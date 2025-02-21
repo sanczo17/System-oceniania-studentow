@@ -33,30 +33,56 @@ class Program
                 promotion.TryAdd(label[i], (sum, result));
             });
         }
-        
         void PrintData()
         {
-                while (promotion.Count < label.Length)
-                {
-                    Thread.Sleep(10);
-                }
+            var failedStudents = promotion.Where(e => e.Value.sum < 51).OrderBy(e => e.Value.sum);
+            var passedStudents = promotion.Where(e => e.Value.sum >= 51).OrderBy(e => e.Value.sum);
+            
+            Console.WriteLine("\n\n\n");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("=====================================");
+            Console.WriteLine(" STUDENCI, KTÓRZY NIE ZDALI ");
+            Console.WriteLine("=====================================\n");
+            Console.ResetColor();
 
-                foreach (var entry in promotion.OrderBy(n=>n.Key))
-                {
-                    Console.WriteLine($"{entry.Key} Suma punktów: {entry.Value.sum:F2} => {entry.Value.result}");
-                    double grade = entry.Value.sum switch
-                    {
-                        >= 90 and <= 100 => 5,
-                            >= 80 and < 90 => 4.5,
-                            >= 70 and < 80 => 4,
-                            >= 60 and < 70 => 3.5,
-                            >= 51 and < 60 => 3,
-                        _ => 2
-                    };
-                    Console.WriteLine($"Ocena: {grade}");
-                    Console.WriteLine(new string('-', 60)); 
-                } 
-        } 
+            foreach (var entry in failedStudents)
+            {
+                PrintStudent(entry);
+            }
+            
+            Console.WriteLine("\n\n\n");
+            Console.ForegroundColor = ConsoleColor.Green; 
+            Console.WriteLine("=====================================");
+            Console.WriteLine(" STUDENCI, KTÓRZY ZDALI");
+            Console.WriteLine("=====================================\n");
+            Console.ResetColor(); 
+
+            foreach (var entry in passedStudents)
+            {
+                PrintStudent(entry);
+            }
+        }
+        
+        void PrintStudent(KeyValuePair<string, (double sum, string result)> entry)
+        {
+            Console.ForegroundColor = entry.Value.sum >= 51 ? ConsoleColor.Green : ConsoleColor.Red;
+            Console.WriteLine($"{entry.Key} | Suma punktów: {entry.Value.sum:F2} => {entry.Value.result}");
+
+            double grade = entry.Value.sum switch
+            {
+                >= 90 and <= 100 => 5,
+                >= 80 and < 90 => 4.5,
+                >= 70 and < 80 => 4,
+                >= 60 and < 70 => 3.5,
+                >= 51 and < 60 => 3,
+                _ => 2
+            };
+
+            Console.WriteLine($"Ocena: {grade}");
+            Console.WriteLine(new string('-', 60));
+            Console.ResetColor();
+        }
+        
         static double GetSecureRandomDouble()
         {
             byte[] bytes = new byte[4];
@@ -69,8 +95,7 @@ class Program
 
     public static async Task Main(string[] args)
     {
-        Program p = new Program();
-        await p.Run();
+        await new Program().Run();
     }
 
 }
